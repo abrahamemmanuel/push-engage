@@ -2,7 +2,6 @@ const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const colors = require('colors');
-const fileupload = require('express-fileupload');
 const ConnectDB = require('./config/db');
 const errorHandler = require('./app/Http/Middleware/error');
 
@@ -38,7 +37,7 @@ app.use('/api/v1/courses', courses);
 app.use(errorHandler);
 
 //create a varibale called PORT and assign it to the env variable PORT
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 //listen to the port
 const server = app.listen(PORT, () => {
