@@ -5,25 +5,35 @@ const { expect } = require('chai');
 const Post = require('../app/Models/Post');
 const Comment = require('../app/Models/Comment');
 
-beforeEach(async () => {
-  await Post.deleteMany();
-  await Comment.deleteMany();
-});
+const posts = JSON.parse(fs.readFileSync(`C:\/Users\/Staff\/Desktop\/PushEngage/database/seeders/posts.json`, 'utf-8'));
+const comments = JSON.parse(fs.readFileSync(`C:\/Users\/Staff\/Desktop\/PushEngage/database/seeders/comments.json`, 'utf-8'));
 
+beforeEach(async () => {
+	await Post.deleteMany();
+	await Comment.deleteMany();
+	await Post.insertMany(posts);
+	await Comment.insertMany(comments);
+});
 describe('GET /api/v1/posts', () => {
-  it('should get all posts', async () => {
-	  	const posts = JSON.parse(fs.readFileSync(`C:\/Users\/Staff\/Desktop\/PushEngage/database/seeders/posts.json`, 'utf-8'));
-		const post = await Post.create(posts);
+	it('should get all posts', async () => {
 		await request(app)
-			.get('/api/v1/posts?page=1&limit=5')
-			.then(res => {
+		.get('/api/v1/posts?page=1&limit=5')
+		.then(res => {
 			expect(res.statusCode).to.equal(200);
 			expect(res.body.count).to.equal(5);
 		});
+		});
 	});
-});
-
-afterEach(async () => {
-  await Post.deleteMany();
-  await Comment.deleteMany();
+	
+//should get a single post by id
+describe('GET /api/v1/posts/:id', () => {
+	it('should get a single post by id', async () => {
+		await request(app)
+		.get('/api/v1/posts/5d713995b721c3bb38c1f5d0')
+		.then(res => {
+			expect(res.statusCode).to.equal(200);
+			expect(res.body.data.post._id).to.equal('5d713995b721c3bb38c1f5d0');
+			expect(res.body.data.comments.length).to.equal(2);
+		});
+	});
 });

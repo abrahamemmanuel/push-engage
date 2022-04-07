@@ -1,5 +1,7 @@
 const Post = require('../../Models/Post');
+const Comment = require('../../Models/Comment');
 const asyncHandler = require('../Middleware/async');
+const errorResponse = require('../../Utils/errorResponse');
 
 //@desc get all posts
 //@route POST /api/v1/posts
@@ -38,5 +40,27 @@ exports.getPosts = asyncHandler(async(req, res, next) => {
 		count: posts.length,
 		data: posts,
 		pagination
+	});
+});
+
+//@desc get a single post by id
+//@route POST /api/v1/posts/:id
+//@access Public
+exports.getPostById = asyncHandler(async(req, res, next) => {
+	const post = await Post.findById(req.params.id);
+	if (!post) {
+		return next(new errorResponse(`Post not found with id of ${req.params.id}`, 404));
+	}
+	const comments = await Comment.find({
+		postId: req.params.id,
+		parentId: null
+	});
+	const data = {
+		post: post,
+		comments: comments
+	}
+	return res.status(200).json({
+		success: true,
+		data: data
 	});
 });

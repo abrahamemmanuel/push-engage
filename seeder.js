@@ -28,13 +28,14 @@ const posts = JSON.parse(
   fs.readFileSync(`${__dirname}/database/seeders/posts.json`, 'utf-8')
 );
 
-// const courses = JSON.parse(
-//   fs.readFileSync(`${__dirname}/database/seeders/courses.json`, 'utf-8')
-// );
+const comments = JSON.parse(
+  fs.readFileSync(`${__dirname}/database/seeders/comments.json`, 'utf-8')
+);
 
 //run node seeder -i in command line to import data
 const importData = asyncHandler(async() => {
     await Post.create(posts);
+	await Comment.create(comments);
     console.log('Data Imported...'.green.inverse);
     process.exit();
 });
@@ -43,7 +44,7 @@ const importData = asyncHandler(async() => {
 //run node seeder -d in command line to delete data
 const deleteData = asyncHandler(async() => {
     await Post.deleteMany();
-    // await Course.deleteMany();
+    await Comment.deleteMany();
     console.log('Data Destroyed...'.red.inverse);
     process.exit();
 });
