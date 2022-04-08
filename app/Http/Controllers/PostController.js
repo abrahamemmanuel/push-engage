@@ -2,14 +2,25 @@ const Post = require('../../Models/Post');
 const Comment = require('../../Models/Comment');
 const asyncHandler = require('../Middleware/async');
 
-//@desc get all posts
+//@desc Create a post
 //@route POST /api/v1/posts
+//@access Public
+exports.createPost = asyncHandler(async (req, res, next) => {
+  const post = await Post.create(req.body);
+  res.status(201).json({
+	success: true,
+	data: post
+  });
+});	
+
+//@desc GET all posts
+//@route GET /api/v1/posts
 //@access Public
 exports.getPosts = asyncHandler(async(req, res, next) => {
 	return res.status(200).json(res.payload);
 });
 
-//@desc get a single post by id
+//@desc GET a single post by id
 //@route POST /api/v1/posts/:id
 //@access Public
 exports.getPostById = asyncHandler(async(req, res, next) => {
@@ -17,7 +28,7 @@ exports.getPostById = asyncHandler(async(req, res, next) => {
 	const comments = await Comment.find({
 		postId: req.params.id,
 		parentId: null
-	});
+	}).sort({createdAt: -1});
 	const data = {
 		post: post,
 		comments: comments
@@ -29,13 +40,12 @@ exports.getPostById = asyncHandler(async(req, res, next) => {
 	});
 });
 
-//@desc Add comment to post
+//@desc Add comment to post || reply to comment
 //@route POST /api/v1/posts/:postId/comments
 //@access Public
 exports.addComment = asyncHandler(async(req, res, next) => {
 	let message = "";
 	let data = null;
-	const post = await Post.findById(req.params.postId);
 	if(req.body.parentId != null){
 		const parentComment = await Comment.findById(req.body.parentId);
 		const reply = await Comment.create({
@@ -67,6 +77,7 @@ exports.addComment = asyncHandler(async(req, res, next) => {
 	});
 });
 
+
 //@desc Get comment replies
 //@route GET /api/v1/posts/:postId/comments/:parentId
 //@access Public
@@ -75,7 +86,7 @@ exports.getCommentReplies = asyncHandler(async(req, res, next) => {
 	const replies = await Comment.find({
 		postId: post._id,
 		parentId: req.params.parentId
-	});
+	}).sort({createdAt: -1});
 	return res.status(200).json({
 		success: true,
 		message: "Replies retrieved successfully",

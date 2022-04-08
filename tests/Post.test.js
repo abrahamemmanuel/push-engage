@@ -16,6 +16,22 @@ beforeEach(async () => {
 	await Comment.insertMany(comments);
 });
 
+//@desc Create a post
+describe('POST /api/v1/posts', () => {
+	it('should create a post', async () => {
+		const res = await request(app)
+			.post('/api/v1/posts')
+			.send({
+				title: 'Test Post',
+				content: 'This is a test post',
+			});
+		expect(res.status).to.equal(201);
+		expect(res.body.success).to.equal(true);
+		expect(res.body.data.title).to.equal('Test Post');
+		expect(res.body.data.content).to.equal('This is a test post');
+	});
+});
+
 // @desc Get all posts
 describe('GET /api/v1/posts', () => {
 	it('should get all posts', async () => {
