@@ -1,46 +1,12 @@
 const Post = require('../../Models/Post');
 const Comment = require('../../Models/Comment');
 const asyncHandler = require('../Middleware/async');
-const errorResponse = require('../../Utils/errorResponse');
 
 //@desc get all posts
 //@route POST /api/v1/posts
 //@access Public
 exports.getPosts = asyncHandler(async(req, res, next) => {
-	//get alll posts
-	let query = Post.find();
-	const page = parseInt(req.query.page, 10) || 1;
-	const limit = parseInt(req.query.limit, 10) || 10;
-	const startIndex = (page - 1) * limit;
-	const endIndex = page * limit;
-	const total = await Post.countDocuments();
-	query = query.skip(startIndex).limit(limit);
-	const posts = await query;
-	const pagination = {};
-	if (endIndex < total) {
-		pagination.next = {
-		page: page + 1,
-		limit
-		};
-	}
-	if (startIndex > 0) {
-		pagination.prev = {
-		page: page - 1,
-		limit
-		};
-	}
-	pagination.links = {
-		current: `${req.protocol}://${req.get('host')}/api/v1/posts?page=${page}&limit=${limit}`,
-		first: `${req.protocol}://${req.get('host')}/api/v1/posts?page=1&limit=${limit}`,
-		next: pagination.next ? `${req.protocol}://${req.get('host')}/api/v1/posts?page=${pagination.next.page}&limit=${pagination.next.limit}` : null,
-		last: `${req.protocol}://${req.get('host')}/api/v1/posts?page=${Math.ceil(total / limit)}&limit=${limit}`
-	};
-	return res.status(200).json({
-		success: true,
-		count: posts.length,
-		data: posts,
-		pagination
-	});
+	return res.status(200).json(res.payload);
 });
 
 //@desc get a single post by id
@@ -48,9 +14,6 @@ exports.getPosts = asyncHandler(async(req, res, next) => {
 //@access Public
 exports.getPostById = asyncHandler(async(req, res, next) => {
 	const post = await Post.findById(req.params.id);
-	if (!post) {
-		return next(new errorResponse(`Post not found with id of ${req.params.id}`, 404));
-	}
 	const comments = await Comment.find({
 		postId: req.params.id,
 		parentId: null
@@ -61,6 +24,61 @@ exports.getPostById = asyncHandler(async(req, res, next) => {
 	}
 	return res.status(200).json({
 		success: true,
+		message: "Post retrieved successfully",
 		data: data
+	});
+});
+
+//@desc Add comment to post
+//@route POST /api/v1/posts/:postId/comments
+//@access Public
+exports.addComment = asyncHandler(async(req, res, next) => {
+	let message = "";
+	let data = null;
+	const post = await Post.findById(req.params.postId);
+	if(req.body.parentId != null){
+		const parentComment = await Comment.findById(req.body.parentId);
+		const reply = await Comment.create({
+			postId: req.params.postId,
+			comment: req.body.comment,
+			parentId: req.body.parentId,
+			children: [],
+		})
+		await reply.save();
+		parentComment.children.push(reply._id);
+		await parentComment.save();
+		message = "Reply added successfully";
+		data = reply;
+	}else{
+		const comment = await Comment.create({
+			postId: req.params.postId,
+			comment: req.body.comment,
+			parentId: null,
+			children: []
+		});
+		await comment.save();
+		message = "Comment added successfully";
+		data = comment;
+	}
+	return res.status(200).json({
+		success: true,
+		message: message,
+		data: data
+	});
+});
+
+//@desc Get comment replies
+//@route GET /api/v1/posts/:postId/comments/:parentId
+//@access Public
+exports.getCommentReplies = asyncHandler(async(req, res, next) => {
+	const post = await Post.findById(req.params.postId);
+	const replies = await Comment.find({
+		postId: post._id,
+		parentId: req.params.parentId
+	});
+	return res.status(200).json({
+		success: true,
+		message: "Replies retrieved successfully",
+		data: replies
 	});
 });

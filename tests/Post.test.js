@@ -5,8 +5,9 @@ const { expect } = require('chai');
 const Post = require('../app/Models/Post');
 const Comment = require('../app/Models/Comment');
 
-const posts = JSON.parse(fs.readFileSync(`C:\/Users\/Staff\/Desktop\/PushEngage/database/seeders/posts.json`, 'utf-8'));
-const comments = JSON.parse(fs.readFileSync(`C:\/Users\/Staff\/Desktop\/PushEngage/database/seeders/comments.json`, 'utf-8'));
+const path = 'C:\/Users\/Staff\/Desktop\/PushEngage';//replace this with the path on your machine
+const posts = JSON.parse(fs.readFileSync(`${path}/database/seeders/posts.json`, 'utf-8'));
+const comments = JSON.parse(fs.readFileSync(`${path}/database/seeders/comments.json`, 'utf-8'));
 
 beforeEach(async () => {
 	await Post.deleteMany();
@@ -14,6 +15,8 @@ beforeEach(async () => {
 	await Post.insertMany(posts);
 	await Comment.insertMany(comments);
 });
+
+// @desc Get all posts
 describe('GET /api/v1/posts', () => {
 	it('should get all posts', async () => {
 		await request(app)
@@ -25,7 +28,7 @@ describe('GET /api/v1/posts', () => {
 		});
 	});
 	
-//should get a single post by id
+//@desc Get a single post by id
 describe('GET /api/v1/posts/:id', () => {
 	it('should get a single post by id', async () => {
 		await request(app)
@@ -34,6 +37,58 @@ describe('GET /api/v1/posts/:id', () => {
 			expect(res.statusCode).to.equal(200);
 			expect(res.body.data.post._id).to.equal('5d713995b721c3bb38c1f5d0');
 			expect(res.body.data.comments.length).to.equal(2);
+		});
+	});
+});
+
+//@desc Add comment to a post
+describe('POST /api/v1/posts/:postId/comments', () => {
+	it('should add comment to a post', async () => {
+		await request(app)
+		.post('/api/v1/posts/5d713995b721c3bb38c1f5d0/comments')
+		.send({
+			comment: 'This is a test comment',
+			parentId: null
+		})
+		.then(res => {
+			expect(res.statusCode).to.equal(200);
+			expect(res.body.data.comment).to.equal('This is a test comment');
+			expect(res.body.data.parentId).to.equal(null);
+			expect(res.body.data.children.length).to.equal(0);
+			expect(res.body.data.postId).to.equal('5d713995b721c3bb38c1f5d0');
+		});
+	});
+});
+
+//@desc Add reply to a comment
+describe('POST /api/v1/posts/:postId/comments', () => {
+	it('should add reply to a comment', async () => {
+		await request(app)
+		.post('/api/v1/posts/5d713995b721c3bb38c1f5d0/comments')
+		.send({
+			comment: 'This is a test reply',
+			parentId: '5b9f4f6b9f4f6a9f4f6a9fc1'
+		})
+		.then(res => {
+			expect(res.statusCode).to.equal(200);
+			expect(res.body.data.comment).to.equal('This is a test reply');
+			expect(res.body.data.parentId).to.equal('5b9f4f6b9f4f6a9f4f6a9fc1');
+			expect(res.body.data.children.length).to.equal(0);
+			expect(res.body.data.postId).to.equal('5d713995b721c3bb38c1f5d0');
+		});
+	});
+});
+
+//@desc Get comment replies
+describe('GET /api/v1/posts/:postId/comments/:parentId', () => {
+	it('should get comment replies', async () => {
+		await request(app)
+		.get('/api/v1/posts/5d713995b721c3bb38c1f5d0/comments/5b9f4f6b9f4f6a9f4f6a9fc0')
+		.then(res => {
+			expect(res.statusCode).to.equal(200);
+			expect(res.body.data[0].parentId).to.equal('5b9f4f6b9f4f6a9f4f6a9fc0');
+			expect(res.body.data.length).to.equal(2);
+			expect(res.body.data[0].postId).to.equal('5d713995b721c3bb38c1f5d0');
 		});
 	});
 });
