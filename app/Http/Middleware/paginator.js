@@ -5,7 +5,7 @@ const paginator = (model, item) => async (req, res, next) => {
 	const startIndex = (page - 1) * limit;
 	const endIndex = page * limit;
 	const total = await model.countDocuments();
-	query = query.skip(startIndex).limit(limit);
+	query = query.skip(startIndex).limit(limit).sort({createdAt: -1});
 	const results = await query;
 	const pagination = {};
 	if (endIndex < total) {
