@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const colors = require('colors');
+const cors = require('cors');
 const ConnectDB = require('./config/db');
 const errorHandler = require('./app/Http/Middleware/error');
 
@@ -13,6 +14,7 @@ const posts = require('./routes/posts');
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 if (process.env.NODE_ENV === 'development') {
