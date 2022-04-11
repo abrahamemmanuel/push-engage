@@ -280,21 +280,31 @@ parentId (*optional*) | string | This used to determine if the comment is a repl
 
 
 
-**name:** Fetch Comment's replies
+**name:** Fetch Comment or Comment's replies by comment ID
 **method:** Get
-**end point:** {{base_url}}/api/v1/posts/{postId}/comments/{parentId}
+**end point:** {{base_url}}/api/v1/posts/{postId}/comments/{commentId}
 
 Request Headers   |  Value |
 ---------- | :--------- |
 Accept |  application/json
 Content-Type |  application/json
 
+Query Param   | Type| Description |
+---------- | :--------- |:--------- |
+item (*optional*) | string | This determines whether to retrieve comment or replies
+
 **Sample Request**
 ```
+for replies set item to replies
+{{base_url}}/api/v1/posts/5d713995b721c3bb38c1f5d0/comments/5b9f4f6b9f4f6a9f4f6a9fc0?item=replies
+
+Otherwise do not set item
+
 {{base_url}}/api/v1/posts/5d713995b721c3bb38c1f5d0/comments/5b9f4f6b9f4f6a9f4f6a9fc0
+
 ```
 
-**Sample Response**
+**Sample Response for replies**
 ```
 "success": true,
 	"message": "Comments retrieved successfully",

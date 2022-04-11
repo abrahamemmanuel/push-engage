@@ -78,18 +78,27 @@ exports.addComment = asyncHandler(async(req, res, next) => {
 });
 
 
-//@desc Get comment replies
-//@route GET /api/v1/posts/:postId/comments/:parentId
+//@desc Get comment replies || comment by id
+//@route GET /api/v1/posts/:postId/comments/:commentId?item=replies
 //@access Public
 exports.getCommentReplies = asyncHandler(async(req, res, next) => {
-	const post = await Post.findById(req.params.postId);
-	const replies = await Comment.find({
-		postId: post._id,
-		parentId: req.params.parentId
-	}).sort({createdAt: -1});
+	let data = null;
+	let message = "";
+	if(req.query.item != null && req.query.item === "replies"){
+		const replies = await Comment.find({
+			postId: req.params.postId,
+			parentId: req.params.commentId
+		}).sort({createdAt: -1});
+		data = replies;
+		message = "Replies retrieved successfully";
+	}else{
+		const comment = await Comment.findById(req.params.commentId);
+		data = comment;
+		message = "Comment retrieved successfully";
+	}
 	return res.status(200).json({
 		success: true,
-		message: "Replies retrieved successfully",
-		data: replies
+		message: message,
+		data: data
 	});
 });
