@@ -352,3 +352,6 @@ Otherwise do not set item
 - run ```node seeder -i``` to insert fake records into database
 - run ```node seeder -d``` to destroy fake records from db
 - run ```node seeder -c``` if you are not sure whether data are in already in db
+
+To run this API on POSTMAN click on the below link
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/9c33356a801564f766a7)
