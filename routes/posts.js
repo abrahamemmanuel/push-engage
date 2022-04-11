@@ -9,6 +9,6 @@ router.route('/').post(createPost);
 router.route('/').get(paginator(Post, 'posts'), getPosts);
 router.route('/:id').get(getPostById);
 router.route('/:postId/comments').post(addComment);
-router.route('/:postId/comments/:parentId').get(getCommentReplies);
+router.route('/:postId/comments/:commentId').get(getCommentReplies);
 
 module.exports = router;

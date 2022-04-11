@@ -96,15 +96,28 @@ describe('POST /api/v1/posts/:postId/comments', () => {
 });
 
 //@desc Get comment replies
-describe('GET /api/v1/posts/:postId/comments/:parentId', () => {
+describe('GET /api/v1/posts/:postId/comments/:commentId', () => {
 	it('should get comment replies', async () => {
 		await request(app)
-		.get('/api/v1/posts/5d713995b721c3bb38c1f5d0/comments/5b9f4f6b9f4f6a9f4f6a9fc0')
+		.get('/api/v1/posts/5d713995b721c3bb38c1f5d0/comments/5b9f4f6b9f4f6a9f4f6a9fc0?item=replies')
 		.then(res => {
 			expect(res.statusCode).to.equal(200);
 			expect(res.body.data[0].parentId).to.equal('5b9f4f6b9f4f6a9f4f6a9fc0');
 			expect(res.body.data.length).to.equal(2);
 			expect(res.body.data[0].postId).to.equal('5d713995b721c3bb38c1f5d0');
+		});
+	});
+});
+
+//@desc Get comment by id
+describe('GET /api/v1/posts/:postId/comments/:commentId', () => {
+	it('should get comment replies', async () => {
+		await request(app)
+		.get('/api/v1/posts/5d713995b721c3bb38c1f5d0/comments/5b9f4f6b9f4f6a9f4f6a9fc0')
+		.then(res => {
+			expect(res.statusCode).to.equal(200);
+			expect(res.body.data.children.length).to.equal(2);
+			expect(res.body.data._id).to.equal('5b9f4f6b9f4f6a9f4f6a9fc0');
 		});
 	});
 });
